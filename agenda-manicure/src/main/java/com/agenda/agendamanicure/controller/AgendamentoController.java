@@ -1,8 +1,10 @@
 package com.agenda.agendamanicure.controller;
 
+import com.agenda.agendamanicure.dto.AgendamentoRequest;
 import com.agenda.agendamanicure.entity.Agendamento;
-import com.agenda.agendamanicure.repository.AgendamentoRepository;
+import com.agenda.agendamanicure.service.AgendamentoService;
 import org.springframework.web.bind.annotation.*;
+import com.agenda.agendamanicure.dto.AgendamentoResponse;
 
 import java.util.List;
 
@@ -10,56 +12,35 @@ import java.util.List;
 @RequestMapping("/agendamentos")
 public class AgendamentoController {
 
-    private final AgendamentoRepository agendamentoRepository;
+    private final AgendamentoService agendamentoService;
 
-    public AgendamentoController(AgendamentoRepository agendamentoRepository) {
-        this.agendamentoRepository = agendamentoRepository;
+    public AgendamentoController(AgendamentoService agendamentoService) {
+        this.agendamentoService = agendamentoService;
     }
 
     @GetMapping
     public List<Agendamento> listar() {
-        return agendamentoRepository.findAll();
+        return agendamentoService.listar();
     }
 
     @PostMapping
-    public Agendamento criar(@RequestBody Agendamento agendamento) {
-        boolean horarioOcupado =
-                agendamentoRepository.existsByProfissional_IdAndDataAndHorarioAndStatusNot(
-                        agendamento.getProfissional().getId(),
-                        agendamento.getData(),
-                        agendamento.getHorario(),
-                        "CANCELADO"
-                );
-
-        if (horarioOcupado) {
-            throw new RuntimeException("Horário já está ocupado para esta profissional.");
-        }
-        return agendamentoRepository.save(agendamento);
+    public AgendamentoResponse criar(@RequestBody AgendamentoRequest request) {
+        return agendamentoService.criar(request);
     }
 
     @GetMapping("/{id}")
     public Agendamento buscarPorId(@PathVariable Long id) {
-        return agendamentoRepository.findById(id).orElse(null);
+        return agendamentoService.buscarPorId(id);
     }
 
     @PutMapping("/{id}/cancelar")
     public Agendamento cancelar(@PathVariable Long id) {
-
-        Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElse(null);
-
-        if (agendamento == null) {
-            return null;
-        }
-
-        agendamento.setStatus("CANCELADO");
-
-        return agendamentoRepository.save(agendamento);
+        return agendamentoService.cancelar(id);
     }
 
     @DeleteMapping("/{id}")
     public void excluir(@PathVariable Long id) {
-        agendamentoRepository.deleteById(id);
+        agendamentoService.excluir(id);
     }
 
     @PutMapping("/{id}")
@@ -67,8 +48,6 @@ public class AgendamentoController {
             @PathVariable Long id,
             @RequestBody Agendamento agendamento) {
 
-        agendamento.setId(id);
-
-        return agendamentoRepository.save(agendamento);
+        return agendamentoService.atualizar(id, agendamento);
     }
 }

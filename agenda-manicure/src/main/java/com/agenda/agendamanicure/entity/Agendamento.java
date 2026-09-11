@@ -1,7 +1,7 @@
 package com.agenda.agendamanicure.entity;
 
 import jakarta.persistence.*;
-
+import com.agenda.agendamanicure.StatusAgendamento;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -25,7 +25,8 @@ public class Agendamento {
 
     private LocalTime horario;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusAgendamento status;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
@@ -54,14 +55,13 @@ public class Agendamento {
         this.horario = horario;
     }
 
-    public String getStatus() {
+    public StatusAgendamento getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusAgendamento status) {
         this.status = status;
     }
-
     public Cliente getCliente() {
         return cliente;
     }
